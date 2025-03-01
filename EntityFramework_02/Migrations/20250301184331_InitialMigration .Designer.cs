@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EntityFramework_02.Migrations
 {
     [DbContext(typeof(ITIContext))]
-    [Migration("20250226233501_InitialMigration")]
+    [Migration("20250301184331_InitialMigration ")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -50,11 +50,19 @@ namespace EntityFramework_02.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TopicId");
+
                     b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("EntityFramework_02.Data.Model.CourseInstructor", b =>
                 {
+                    b.Property<int>("Inst_ID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Course_ID")
+                        .HasColumnType("int");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
@@ -65,6 +73,12 @@ namespace EntityFramework_02.Migrations
 
                     b.Property<int>("InstructorId")
                         .HasColumnType("int");
+
+                    b.HasKey("Inst_ID", "Course_ID");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("InstructorId");
 
                     b.ToTable("courseInstructors");
                 });
@@ -89,6 +103,9 @@ namespace EntityFramework_02.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InstructorId")
+                        .IsUnique();
+
                     b.ToTable("Departments");
                 });
 
@@ -112,8 +129,8 @@ namespace EntityFramework_02.Migrations
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("HourRate")
-                        .HasColumnType("int");
+                    b.Property<decimal>("HourRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -123,6 +140,8 @@ namespace EntityFramework_02.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Instructors");
                 });
@@ -152,19 +171,25 @@ namespace EntityFramework_02.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.ToTable("Students");
                 });
 
             modelBuilder.Entity("EntityFramework_02.Data.Model.StudentCourse", b =>
                 {
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Grade")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                    b.HasKey("StudentId", "CourseId");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("studentCourses");
                 });
@@ -184,6 +209,115 @@ namespace EntityFramework_02.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Topics");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Course", b =>
+                {
+                    b.HasOne("EntityFramework_02.Data.Model.Topic", "Topic")
+                        .WithMany("Courses")
+                        .HasForeignKey("TopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.CourseInstructor", b =>
+                {
+                    b.HasOne("EntityFramework_02.Data.Model.Course", "Course")
+                        .WithMany("CourseInstructors")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EntityFramework_02.Data.Model.Instructor", "Instructor")
+                        .WithMany("CourseInstructors")
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Department", b =>
+                {
+                    b.HasOne("EntityFramework_02.Data.Model.Instructor", "Instructor")
+                        .WithOne()
+                        .HasForeignKey("EntityFramework_02.Data.Model.Department", "InstructorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Instructor", b =>
+                {
+                    b.HasOne("EntityFramework_02.Data.Model.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Student", b =>
+                {
+                    b.HasOne("EntityFramework_02.Data.Model.Department", "Department")
+                        .WithMany("Students")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.StudentCourse", b =>
+                {
+                    b.HasOne("EntityFramework_02.Data.Model.Course", "Course")
+                        .WithMany("StudentCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EntityFramework_02.Data.Model.Student", "Student")
+                        .WithMany("StudentCourses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Course", b =>
+                {
+                    b.Navigation("CourseInstructors");
+
+                    b.Navigation("StudentCourses");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Department", b =>
+                {
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Instructor", b =>
+                {
+                    b.Navigation("CourseInstructors");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Student", b =>
+                {
+                    b.Navigation("StudentCourses");
+                });
+
+            modelBuilder.Entity("EntityFramework_02.Data.Model.Topic", b =>
+                {
+                    b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

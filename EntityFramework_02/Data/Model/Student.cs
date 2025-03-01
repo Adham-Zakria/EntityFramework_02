@@ -15,7 +15,12 @@ namespace EntityFramework_02.Data.Model
         public string LName { get; set; }
         public string Address { get; set; }
         public int Age { get; set; }
+
+        public Department Department { get; set; }
+
         public int DepartmentId { get; set; }
+
+        public ICollection<StudentCourse> StudentCourses { get; set; }
 
     }
 }

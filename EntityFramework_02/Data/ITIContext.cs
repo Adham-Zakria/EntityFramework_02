@@ -31,9 +31,36 @@ namespace EntityFramework_02.Data
                 .HasDefaultValue("Alex");
             });
 
-            modelBuilder.Entity<CourseInstructor>().HasNoKey();
+            modelBuilder.Entity<StudentCourse>()
+                       .HasKey(sc => new { sc.StudentId, sc.CourseId });
 
-            modelBuilder.Entity<StudentCourse>().HasNoKey();
+            modelBuilder.Entity<CourseInstructor>()
+                       .HasKey(ci => new { ci.Inst_ID, ci.Course_ID });
+
+            // Student - Department (Many-to-One)
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.Department)
+                .WithMany(d => d.Students)
+                .HasForeignKey(s => s.DepartmentId);
+
+            // Instructor - Department (One-to-One)
+            modelBuilder.Entity<Department>()
+                .HasOne(d => d.Instructor)
+                .WithOne()
+                .HasForeignKey<Department>(d => d.InstructorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Course - Topic (Many-to-One)
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Topic)
+                .WithMany(t => t.Courses)
+                .HasForeignKey(c => c.TopicId);
+
+            // Instructor - Department (Many-to-One)
+            modelBuilder.Entity<Instructor>()
+                .HasOne(i => i.Department)
+                .WithMany()
+                .HasForeignKey(i => i.DepartmentId);
 
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

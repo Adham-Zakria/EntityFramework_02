@@ -10,5 +10,7 @@ namespace EntityFramework_02.Data.Model
     {
         public int Id { get; set; }
         public required string Name { get; set; }
+
+        public ICollection<Course> Courses { get; set; }
     }
 }
